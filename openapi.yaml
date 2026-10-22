@@ -23,3 +23,12 @@ paths:
       responses:
         "200": {description: Utilisateur}
         "404": {description: Introuvable}
+  /search:
+    get:
+      parameters:
+        - name: name
+          in: query
+          required: true
+          schema: {type: string, example: alice}
+      responses:
+        "200": {description: Utilisateurs correspondants}
