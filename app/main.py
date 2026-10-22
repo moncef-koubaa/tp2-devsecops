@@ -3,7 +3,7 @@ import os
 import sqlite3
 import tempfile
 
-from flask import Flask, abort, jsonify
+from flask import Flask, abort, jsonify, request
 
 DB_PATH = os.environ.get("DB_PATH", os.path.join(tempfile.gettempdir(), "app.db"))
 
@@ -58,6 +58,15 @@ def get_user(user_id):
     if row is None:
         abort(404)
     return jsonify(id=row["id"], name=row["name"])
+
+
+@app.route("/search")
+def search():
+    # VULNERABLE : le paramètre est concaténé dans la requête SQL (injection SQL)
+    name = request.args.get("name", "")
+    with get_db() as conn:
+        rows = conn.execute("SELECT id, name FROM users WHERE name = '" + name + "'").fetchall()
+    return jsonify(users=[dict(r) for r in rows])
 
 
 init_db()

@@ -31,3 +31,8 @@ def test_security_headers():
     r = client().get("/")
     assert r.headers["X-Content-Type-Options"] == "nosniff"
     assert r.headers["X-Frame-Options"] == "DENY"
+
+
+def test_search():
+    r = client().get("/search?name=alice")
+    assert r.get_json()["users"] == [{"id": 1, "name": "alice"}]
