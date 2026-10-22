@@ -1,4 +1,5 @@
 """Petite API Flask utilisée pour le TP2 DevSecOps."""
+import ipaddress
 import os
 import sqlite3
 import subprocess
@@ -63,9 +64,16 @@ def get_user(user_id):
 
 @app.route("/ping")
 def ping():
-    # VULNERABLE : l'entrée utilisateur est passée à un shell (injection de commande)
+    # CORRIGE : seule une adresse IP valide est acceptée et aucun shell n'est utilisé
     host = request.args.get("host", "127.0.0.1")
-    result = subprocess.run(f"ping -c 1 {host}", shell=True, capture_output=True, text=True)
+    try:
+        ip = ipaddress.ip_address(host)
+    except ValueError:
+        return jsonify(error="adresse IP invalide"), 400
+    result = subprocess.run(  # nosec B603 - arguments fixes, IP validée
+        ["/usr/bin/ping", "-c", "1", "-W", "1", str(ip)],
+        capture_output=True, text=True, timeout=5, check=False,
+    )
     return jsonify(output=result.stdout + result.stderr)
 
 
