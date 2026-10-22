@@ -1,0 +1,25 @@
+openapi: 3.0.3
+info:
+  title: TP2 DevSecOps API
+  version: "1.0"
+servers:
+  - url: http://localhost:5000
+paths:
+  /:
+    get:
+      responses:
+        "200": {description: Index}
+  /health:
+    get:
+      responses:
+        "200": {description: Etat du service}
+  /users/{user_id}:
+    get:
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema: {type: integer, example: 1}
+      responses:
+        "200": {description: Utilisateur}
+        "404": {description: Introuvable}
