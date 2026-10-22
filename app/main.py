@@ -1,10 +1,9 @@
 """Petite API Flask utilisée pour le TP2 DevSecOps."""
 import os
 import sqlite3
-import subprocess
 import tempfile
 
-from flask import Flask, abort, jsonify, request
+from flask import Flask, abort, jsonify
 
 DB_PATH = os.environ.get("DB_PATH", os.path.join(tempfile.gettempdir(), "app.db"))
 
@@ -59,14 +58,6 @@ def get_user(user_id):
     if row is None:
         abort(404)
     return jsonify(id=row["id"], name=row["name"])
-
-
-@app.route("/ping")
-def ping():
-    # VULNERABLE : l'entrée utilisateur est passée à un shell (injection de commande)
-    host = request.args.get("host", "127.0.0.1")
-    result = subprocess.run(f"ping -c 1 {host}", shell=True, capture_output=True, text=True)
-    return jsonify(output=result.stdout + result.stderr)
 
 
 init_db()
