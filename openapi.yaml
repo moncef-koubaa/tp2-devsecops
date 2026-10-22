@@ -23,3 +23,12 @@ paths:
       responses:
         "200": {description: Utilisateur}
         "404": {description: Introuvable}
+  /ping:
+    get:
+      parameters:
+        - name: host
+          in: query
+          required: true
+          schema: {type: string, example: 127.0.0.1}
+      responses:
+        "200": {description: Resultat du ping}
