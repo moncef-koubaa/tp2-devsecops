@@ -1,9 +1,11 @@
 """Petite API Flask utilisée pour le TP2 DevSecOps."""
+import ipaddress
 import os
 import sqlite3
+import subprocess
 import tempfile
 
-from flask import Flask, abort, jsonify
+from flask import Flask, abort, jsonify, request
 
 DB_PATH = os.environ.get("DB_PATH", os.path.join(tempfile.gettempdir(), "app.db"))
 
@@ -58,6 +60,21 @@ def get_user(user_id):
     if row is None:
         abort(404)
     return jsonify(id=row["id"], name=row["name"])
+
+
+@app.route("/ping")
+def ping():
+    # CORRIGE : seule une adresse IP valide est acceptée et aucun shell n'est utilisé
+    host = request.args.get("host", "127.0.0.1")
+    try:
+        ip = ipaddress.ip_address(host)
+    except ValueError:
+        return jsonify(error="adresse IP invalide"), 400
+    result = subprocess.run(  # nosec B603 - arguments fixes, IP validée
+        ["/usr/bin/ping", "-c", "1", "-W", "1", str(ip)],
+        capture_output=True, text=True, timeout=5, check=False,
+    )
+    return jsonify(output=result.stdout + result.stderr)
 
 
 init_db()

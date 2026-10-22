@@ -31,3 +31,12 @@ def test_security_headers():
     r = client().get("/")
     assert r.headers["X-Content-Type-Options"] == "nosniff"
     assert r.headers["X-Frame-Options"] == "DENY"
+
+
+def test_ping_rejects_command_injection():
+    r = client().get("/ping?host=127.0.0.1;cat /etc/passwd")
+    assert r.status_code == 400
+
+
+def test_ping_rejects_hostname():
+    assert client().get("/ping?host=example.com").status_code == 400
